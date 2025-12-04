@@ -1,213 +1,137 @@
 Taller: Clasificación con Diabetes Health Indicators
-Fundación Universitaria Los Libertadores – noviembre de 2025
+
+Fundación Universitaria Los Libertadores – Noviembre 2025
 Autora: Camila Andrea Hernández González
+
+Proyecto: Predicción de Diabetes con Machine Learning
+
+Este proyecto implementa un clasificador reproducible para predecir la presencia de diabetes usando el dataset Diabetes Health Indicators.
+Se desarrolla siguiendo el ciclo CRISP-DM, integrando buenas prácticas: no leakage, validación cruzada, técnicas de balanceo y uso apropiado de métricas.
+
 1. Objetivo general
 
-Desarrollar, evaluar e interpretar un clasificador reproducible para predecir diabetes usando el conjunto de datos Diabetes Health Indicators, siguiendo el ciclo CRISP-DM de extremo a extremo y aplicando técnicas de preprocesamiento, balanceo, validación cruzada y selección de métricas.
+Desarrollar, evaluar e interpretar un clasificador reproducible para predecir diabetes usando el dataset Diabetes Health Indicators, aplicando CRISP-DM extremo a extremo y seleccionando una métrica prioritaria basada en costo-error.
 
-2. Resultados de aprendizaje abordados
+2. Descripción del dataset
 
-Ejecución completa del ciclo CRISP-DM.
+El conjunto de datos contiene 100 000 registros y 31 variables, incluyendo:
 
-Diseño de pipelines evitando data leakage.
+Datos demográficos
 
-Diagnóstico del desbalance y uso de class_weight.
+Hábitos de vida
 
-Selección argumentada de métricas priorizadas (Recall / PR-AUC).
+Indicadores clínicos (glucosa, colesterol, presión arterial, etc.)
 
-Entrenamiento, evaluación y análisis de un clasificador base y su desempeño en test.
+Antecedentes familiares y personales
 
-Elaboración de gráficos, reporte descriptivo y trazabilidad en repositorio.
+Variable objetivo: diagnosed_diabetes (0 = No, 1 = Sí)
 
-3. Descripción del dataset
+3. Estadística descriptiva
 
-El dataset contiene 100 000 registros y 31 variables, incluyendo características demográficas, hábitos de vida, indicadores clínicos y dos columnas asociadas directamente al diagnóstico:
+Distribución del target:
 
-diabetes_stage
+Clases balanceadas moderadamente:
 
-diabetes_risk_score
+59.9% con diabetes
 
-Estas columnas no pueden usarse como predictores porque generan leakage.
+40.0% sin diabetes
 
-La variable objetivo es:
+No hay valores faltantes en el dataset.
+Las variables numéricas presentan rangos adecuados para escalamiento (standardization).
 
-diagnosed_diabetes (0 = No, 1 = Sí)
+4. Preprocesamiento (Pipeline reproducible)
 
-El dataset presenta un desbalance moderado:
-
-Clase 1: 59.9 %
-
-Clase 0: 40.0 %
-
-4. Estadística descriptiva
-
-Se realizaron las siguientes tareas:
-
-Revisión de estructura del dataset (shape)
-
-Tipos de datos por columna
-
-Ausencia de valores faltantes
-
-Distribución del target
-
-Resumen estadístico de variables numéricas
-
-Identificación de variables categóricas y numéricas
-
-Se generaron gráficos en PNG:
-
-grafico_bmi_diabetes.png – Distribución de BMI por diagnóstico
-
-grafico_diabetes_genero.png – Proporción de diabetes por género
-
-5. Preparación de datos
-5.1 Evitar leakage
-
-Se eliminaron las columnas:
+Eliminación de columnas con leakage:
 
 diabetes_stage
 
 diabetes_risk_score
 
-5.2 División Train/Test
+Separación Train/Test con stratify=y para conservar la proporción 60/40.
 
-Se usó train_test_split con:
+Pipeline scikit-learn:
 
-80 % entrenamiento
+Escalado (StandardScaler) para numéricas
 
-20 % prueba
+One-Hot Encoding para categóricas
 
-Estratificación para mantener la proporción 60/40
+Modelo: Regresión Logística con class_weight="balanced"
 
-5.3 Identificación de tipos:
+Este setup se asegura de evitar data leakage y permite reproducibilidad total.
 
-Variables categóricas:
-gender, ethnicity, education_level, income_level, employment_status, smoking_status
+5. Validación cruzada (5-fold)
 
-Variables numéricas:
-22 variables clínicas y de comportamiento.
+Promedios obtenidos:
 
-6. Modelado
-6.1 Pipeline de preprocesamiento
+Recall: 0.877
 
-Incluye:
+Precision: 0.929
 
-Estandarización de variables numéricas (StandardScaler)
+F1-score: 0.902
 
-Codificación One-Hot para variables categóricas (OneHotEncoder)
+ROC-AUC: 0.934
 
-6.2 Modelo principal
+PR-AUC: 0.967
 
-Se entrenó Regresión Logística con:
+Balanced Accuracy: 0.888
 
-max_iter = 1000
+Métrica prioritaria:
+Se selecciona PR-AUC, ya que en este tipo de problema es más importante reducir falsos negativos y evaluar rendimiento sobre la clase positiva.
 
-class_weight = balanced para corregir el desbalance del dataset.
+6. Resultados en Test
 
-6.3 Validación cruzada (5 folds)
+Accuracy: 0.89
 
-Métricas evaluadas:
+ROC-AUC: 0.934
 
-Recall
+PR-AUC: 0.967
 
-Precision
+La regresión logística muestra excelente capacidad discriminativa y buen equilibrio entre sensibilidad (recall) y precisión.
 
-F1
+Matriz de confusión, curva ROC y curva Precision-Recall están incluidas en la carpeta del proyecto como archivos PNG.
 
-ROC-AUC
+7. Conclusiones
 
-PR-AUC
+El modelo basado en Regresión Logística es altamente efectivo para este dataset.
 
-Balanced Accuracy
+La métrica prioritaria PR-AUC muestra excelente desempeño (0.967), lo que indica muy buen manejo de falsos positivos y negativos.
 
-Resultados promedio:
+El pipeline asegura cero leakage y total reproducibilidad.
 
-Métrica	Desempeño promedio
-Recall	0.877
-Precision	0.929
-F1	0.902
-ROC-AUC	0.934
-PR-AUC	0.967
-Balanced Accuracy	0.888
-7. Evaluación en test
+Se gestionó el desbalance mediante class_weight="balanced" dentro del proceso de validación cruzada, lo cual mejora la calidad del modelo.
 
-Después del entrenamiento final:
+La metodología CRISP-DM se ejecutó de forma completa: exploración, preparación, modelado, evaluación y documentación.
 
-Reporte de clasificación:
+8. Cómo ejecutar el proyecto
+1. Crear entorno virtual (opcional)
+python -m venv venv
+source venv/bin/activate   # Mac/Linux
+venv\Scripts\activate      # Windows
 
-Accuracy test: 0.89
+2. Instalar dependencias
+pip install -r requirements.txt
 
-Recall clase 1: 0.88
+3. Ejecutar el script principal
+python main.py
 
-ROC-AUC test: 0.934
+4. Abrir el notebook
 
-PR-AUC test: 0.967
+Desde cualquier entorno:
 
-Archivos generados:
-
-matriz_confusion_logreg.png
-
-curva_roc_logreg.png
-
-curva_pr_logreg.png
-
-8. Interpretación de resultados
-
-El modelo tiene un muy buen desempeño global (ROC-AUC y PR-AUC altos).
-
-La métrica prioritaria es Recall, por ser un problema clínico donde es peor no detectar personas con diabetes.
-
-El modelo mantiene un equilibrio adecuado entre Recall y Precision.
-
-No hay evidencia de sobreajuste según la comparación Train vs Test.
+jupyter notebook
 
 9. Estructura del repositorio
-Taller-Clasificacion-DiabetesCAHG/
-│── diabetes_dataset.csv
 │── main.py
 │── README.md
 │── requirements.txt
+│── Taller_Diabetes_Clasificacion_CAH.ipynb
+│── diabetes_dataset.csv
 │── grafico_bmi_diabetes.png
 │── grafico_diabetes_genero.png
-│── matriz_confusion_logreg.png
 │── curva_roc_logreg.png
 │── curva_pr_logreg.png
-│── notebook_taller.ipynb
-└── .gitignore
+│── matriz_confusion_logreg.png
 
-10. Cómo ejecutar el proyecto
+10. Licencia
 
-Crear y activar un entorno virtual
-
-Instalar dependencias:
-
-pip install -r requirements.txt
-
-
-Ejecutar:
-
-python main.py
-
-
-Abrir el notebook opcional:
-
-jupyter notebook notebook_taller.ipynb
-
-11. Limitaciones
-
-El dataset es sintético; los resultados pueden no trasladarse a escenarios clínicos reales.
-
-Solo se probó un modelo base; versiones más complejas (RandomForest, XGBoost) podrían mejorar resultados.
-
-No se realizó calibración de probabilidades (pendiente para etapa futura).
-
-12. Próximos pasos
-
-Explorar modelos avanzados
-
-Calibración con Platt o Isotónica
-
-SHAP para interpretabilidad
-
-Pipeline con optimización de hiperparámetros (GridSearchCV o Optuna)
+Uso académico
