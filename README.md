@@ -135,3 +135,19 @@ jupyter notebook
 10. Licencia
 
 Uso académico
+
+## Resultados y discusión
+
+El conjunto de datos contiene 100 000 registros y 31 variables. No se encontraron valores faltantes. La variable objetivo `diagnosed_diabetes` presenta una ligera mayor proporción de casos positivos: aproximadamente 60 % de las observaciones corresponden a personas con diagnóstico de diabetes y 40 % a personas sin diagnóstico. Este desbalance motivó el uso de `class_weight="balanced"` en la regresión logística.
+
+En la estadística descriptiva se observan valores medios de IMC (BMI) alrededor de 25–26, con una distribución más cargada hacia valores altos en el grupo con diabetes. El histograma de BMI por diagnóstico muestra que, aunque los rangos se solapan, las personas con diabetes tienden a concentrarse más en IMC altos, lo que es consistente con la literatura sobre sobrepeso y riesgo metabólico. La gráfica de proporción de diabetes por género indica prevalencias muy similares entre hombres y mujeres, con ligeras variaciones que no parecen dominantes frente a otros factores de riesgo.
+
+El modelo principal fue una regresión logística dentro de un pipeline de `scikit-learn` que incluye escalado de variables numéricas y codificación one-hot de las categóricas. Para evitar leakage se excluyeron explícitamente las variables `diabetes_stage` y `diabetes_risk_score` antes de separar la base en entrenamiento y prueba. La partición se hizo con `train_test_split` estratificado, manteniendo el 60/40 de la variable objetivo en ambos subconjuntos.
+
+En la validación cruzada estratificada de 5 pliegues, la regresión logística obtuvo valores estables: recall medio cercano a 0.88, precisión alrededor de 0.93, F1 aproximadamente 0.90, ROC-AUC en torno a 0.93, PR-AUC alrededor de 0.97 y balanced accuracy cercana a 0.89. Estos resultados indican que el modelo es capaz de distinguir bien entre personas con y sin diabetes, especialmente cuando se evalúa con métricas sensibles al desbalance como PR-AUC y balanced accuracy.
+
+En el conjunto de prueba (20 % de los datos), el comportamiento fue muy similar al observado en la validación cruzada. El reporte de clasificación muestra una precisión alta para la clase positiva (≈0.93) y un recall también alto (≈0.88). La matriz de confusión refleja que el modelo detecta la mayoría de los casos de diabetes, aunque todavía existen falsos negativos (personas con diabetes clasificadas como sanas) que conviene minimizar porque tienen mayor costo en términos de salud pública. La ROC-AUC (~0.93) y la PR-AUC (~0.97) confirman que, para una amplia gama de umbrales, el modelo mantiene una buena capacidad discriminativa.
+
+Las curvas ROC y Precision–Recall muestran el típico compromiso entre recall y precisión. Desde la perspectiva del problema, es preferible priorizar un alto recall para la clase positiva, aceptando algunos falsos positivos siempre que el modelo sirva como herramienta de tamizaje o priorización y no como diagnóstico definitivo. En ese contexto, la métrica prioritaria elegida es la PR-AUC, complementada por el recall de la clase positiva, porque reflejan mejor el costo de dejar pasar casos de diabetes que deberían ser detectados de forma temprana.
+
+En resumen, el clasificador basado en regresión logística, con un pipeline correctamente configurado y sin leakage, logra un desempeño alto y estable tanto en validación cruzada como en el conjunto de prueba. El modelo es sencillo de interpretar, reproducible y adecuado como primer filtro automatizado para apoyar la detección temprana de posibles casos de diabetes en poblaciones grandes.
